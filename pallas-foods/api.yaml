@@ -10,7 +10,7 @@ info:
     name: "Apache 2.0"
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 host: "swagger.monsoon-sites.com"
-basePath: "/v1"
+basePath: "/rest/v1"
 tags:
 - name: "store"
   description: "Rest API for getting prices, stock order actions"
@@ -28,9 +28,7 @@ paths:
       operationId: "storePrice"
       consumes:
       - "application/json"
-      - "application/xml"
       produces:
-      - "application/xml"
       - "application/json"
       parameters:
       - name: "sku"
@@ -53,7 +51,7 @@ paths:
         400:
           description: "Error Response"
           schema:
-            $ref: "#/definitions/Error"
+            $ref: "#/definitions/CommonError"
   /store/inventory:
     get:
       tags:
@@ -62,7 +60,6 @@ paths:
       description: "This API is to return the amount of on hand stock per product based on the location, delivery date and website."
       operationId: "storeInventory"
       produces:
-      - "application/xml"
       - "application/json"
       parameters:
       - name: "sku"
@@ -92,6 +89,8 @@ paths:
         description: "Type Available values: B2B"
         required: true
         type: "string"
+        enum:
+          - "B2B"
       responses:
         200:
           description: "successful operation"
@@ -100,7 +99,7 @@ paths:
         400:
           description: "Invalid status value"
           schema:
-            $ref: "#/definitions/Error"
+            $ref: "#/definitions/CommonError"
   /store/order/minimum_amount:
     get:
       tags:
@@ -109,7 +108,6 @@ paths:
       description: "This API is to check the minimum order amount a customer has to reach in order to be able to place an order based on the Delivery Date."
       operationId: "storeOrderMinimumAmount"
       produces:
-      - "application/xml"
       - "application/json"
       parameters:
       - name: "delivery_date"
@@ -137,152 +135,38 @@ paths:
     post:
       tags:
       - "store"
-      summary: "Order Simulation/Order Export API"
-      description: "Web service to be utilized after the order placement. In case of issues with the order export, the order will be saved in Magento with the status “Export failed” and a comment to the order history will be added with the details of the error: the order will be queued and subsequent attempts will be executed, until the maximum number of attempts is reached, after which, a Pallas Foods member will have to manually intervene. "
+      summary: "Order Simulation/Export"
+      description: "Web service to be utilized after the order placement. In case of issues with the order export, the order will be saved in Magento with the status 'Export failed' and a comment to the order history will be added with the details of the error: the order will be queued and subsequent attempts will be executed, until the maximum number of attempts is reached, after which, a Pallas Foods member will have to manually intervene. "
       operationId: "storeOrder"
+      consumes:
+      - "application/json"
       produces:
-      - "application/xml"
       - "application/json"
       parameters:
-      - name: "magentoOrderNumber"
-        in: "query"
-        description: "Magento Order Reference Number. If the field is empty - this will be an order simulation call returning validation results If the field is not empty - this will be an order creation call "
-        required: false
-        type: "string"
-      - name: "webOrderType"
-        in: "query"
-        description: "Web Order Type: Available values: B2B or CCOLLECT note: values copied from M1 - to be verified by PallasFoods"
-        required: true
-        type: "string"
-      - name: "navCustomerB2B"
-        in: "query"
-        description: "Customer B2B Identifier"
-        required: true
-        type: "string"
-      - name: "creationDate"
-        in: "query"
-        description: "Order creation date in format YYYY-MM-DD"
-        required: true
-        type: "string"
-      - name: "deliveryDate"
-        in: "query"
-        description: "Order delivery date in format YYYY-MM-DD"
-        required: true
-        type: "string"
-      - name: "customerReference"
-        in: "query"
-        description: "Purchase Order Number"
-        required: true
-        type: "string"
-      - name: "orderValue"
-        in: "query"
-        description: "Order Total"
-        required: true
-        type: "number"
-      - name: "taxValue"
-        in: "query"
-        description: "Tax Amount"
-        required: true
-        type: "number"
-      - name: "orderDiscountValue"
-        in: "query"
-        description: "Order Discount Amount"
-        required: true
-        type: "number"
-      - name: "currency"
-        in: "query"
-        description: "Order Currency"
-        required: true
-        type: "string"
-        enum:
-          - "EUR"
-          - "GBP"
-      - name: "customerAccountNumber"
-        in: "query"
-        description: "Customer AX ID note: Field duplicates value from navCustomerB2B - to be verified with PallasFoods if we need to send both fields"
-        required: true
-        type: "string"
-      - name: "routeCode"
-        in: "query"
-        description: "Route Code"
-        required: true
-        type: "string"
-      - name: "routePosition"
-        in: "query"
-        description: "Number of booking time slots"
-        required: true
-        type: "string"
-
-      - name: "buyerName"
-        in: "query"
-        description: "Customer Full Name"
-        required: false
-        type: "string"
-      - name: "contactFirstName"
-        in: "query"
-        description: "Customer First Name"
-        required: false
-        type: "string"
-      - name: "contactSecondName"
-        in: "query"
-        description: "Customer Last Name"
-        required: false
-        type: "string"
-      - name: "contactTelephoneName"
-        in: "query"
-        description: "Customer Phone Number"
-        required: false
-        type: "string"
-      - name: "emailAddress"
-        in: "query"
-        description: "Customer Email address"
-        required: true
-        type: "string"
-      - name: "addressLine1"
-        in: "query"
-        description: "Street Address 1"
-        required: false
-        type: "string"
-      - name: "addressLine2"
-        in: "query"
-        description: "Street Address 2"
-        required: false
-        type: "string"
-      - name: "addressCity"
-        in: "query"
-        description: "Address City"
-        required: false
-        type: "string"
-      - name: "addressRegion"
-        in: "query"
-        description: "Address Region"
-        required: false
-        type: "string"
-      - name: "addressCountry"
-        in: "query"
-        description: "Address Country"
-        required: false
-        type: "string"
-      - name: "addressPostCode"
-        in: "query"
-        description: "Address Postal code"
-        required: false
-        type: "string"
-      - name: "items"
-        in: "body"
-        description: "Order Lines"
-        required: false
-        schema:
-            $ref: "#/definitions/OrderLines"
+        - in: "body"
+          name: "body"
+          description: "Order simulation/export"
+          required: true
+          schema:
+            $ref: "#/definitions/OrderSimulation"
       responses:
         200:
-          description: "successful operation"
+          description: "successful order export"
           schema:
-            $ref: "#/definitions/Order"
+            $ref: "#/definitions/OrderExport"
+        202:
+          description: "successful order simulation"
+          schema:
+            $ref: "#/definitions/OrderSimulationResponse"
         400:
           description: "Invalid ID supplied"
-        404:
-          description: "Pet not found"
+          schema:
+            $ref: "#/definitions/OrderSimulationError"
+        406:
+          description: ""
+          schema:
+            allOf:
+              - $ref: "#/definitions/OrderSimulationRejected"
 definitions:
   Price:
     type: "object"
@@ -348,30 +232,198 @@ definitions:
     properties:
       total_order_value:
         type: "number"
+        format: "float"
         example: "300.00"
     xml:
       name: "MinimumAmount"
-  Order:
+  OrderSimulation:
     type: "object"
+    required:
+      - "webOrderType"
+      - "navCustomerB2B"
+      - "creationTime"
+      - "deliveryDate"
+      - "customerReference"
+      - "orderValue"
+      - "taxValue"
+      - "orderDiscountValue"
+      - "currency"
+      - "customerAccountNumber"
+      - "routeCode"
+      - "routePosition"
+      - "emailAddress"
     properties:
-      items:
-        $ref: "#/definitions/PriceItems"
-      totalCount:
+      magentoOrderNumber:
+        type: "string"
+        description: "Magento Order Reference Number. If the field is empty - this will be an order simulation call returning validation results If the field is not empty - this will be an order creation call"
+      webOrderType:
+        type: "string"
+        description: "Web Order Type"
+        enum:
+          - "B2B"
+          - "CCOLLECT"
+      navCustomerB2B:
+        type: "string"
+        description: "Customer B2B Identifier"
+      creationDate:
+        type: "string"
+        description: "Order creation date in format YYYY-MM-DD"
+      deliveryDate:
+        type: "string"
+        description: "Order delivery date in format YYYY-MM-DD"
+      customerReference:
+        type: "string"
+        description: "Purchase Order Number"
+      orderValue:
         type: "number"
-    xml:
-      name: "MinimumAmount"
-  OrderLines:
-    type: "object"
-    properties:
+        format: "float"
+        description: "Order Total"
+      taxValue:
+        type: "number"
+        format: "float"
+        description: "Tax amount"
+      orderDiscountValue:
+        type: "number"
+        format: "float"
+        description: "Order Discount Amount"
+      currency:
+        type: "string"
+        description: "Order Currency"
+        enum:
+          - "EUR"
+          - "GBR"
+      customerAccountNumber:
+        type: "string"
+        description: "Customer AX ID note: Field duplicates value from navCustomerB2B - to be verified with PallasFoods if we need to send both fields"
+      routeCode:
+        type: "string"
+        description: "ROute Code"
+      routePosition:
+        type: "string"
+        description: "Number of booking time slots"
+      buyerName:
+        type: "string"
+        description: "Customer Full Name"
+      contactFirstName:
+        type: "string"
+        description: "Customer First Name"
+      contactSecondName:
+        type: "string"
+        description: "Customer Last Name"
+      contactTelephoneName:
+        type: "string"
+        description: "Customer Phone Number"
+      emailAddress:
+        type: "string"
+        description: "Customer Email address"
+      addressLine1:
+        type: "string"
+        description: "Street Address 1"
+      addressLine2:
+        type: "string"
+        description: "Street Address 2"
+      addressCity:
+        type: "string"
+        description: "Address City"
+      addressCounty:
+        type: "string"
+        description: "Address Region"
+      addressCounrty:
+        type: "string"
+        description: "Address Country"
+      addressPostCode:
+        type: "string"
+        description: "Address Postal code"
       items:
         type: "array"
         items:
-            $ref: '#/definitions/OrderItems'
+          allOf: 
+          - $ref: "#/definitions/OrderSimulationItemsAccepted"
     xml:
-      name: "OrderLines"
-  OrderItems:
+      name: "Order simulation"
+  OrderSimulationResponse:
     type: "object"
     properties:
+      deliveryDate:
+        type: "string"
+        example: "2019-12-24"
+        description: "Order delivery date in format YYYY-MM-DD"
+      orderStatus:
+        type: "string"
+        example: "ACCEPTED"
+      reasonCode:
+        type: "string"
+        example: "200"
+      customerAccountNumber:
+        type: "string"
+        example: "AX1234"
+      items:
+        type: "array"
+        items:
+          allOf: 
+          - $ref: "#/definitions/OrderSimulationItemsAccepted"
+    xml:
+      name: "Order simulation"
+  OrderSimulationRejected:
+    type: "object"
+    properties:
+      deliveryDate:
+        type: "string"
+        example: "2019-12-24"
+        description: "Order delivery date in format YYYY-MM-DD"
+      orderStatus:
+        type: "string"
+        example: "LINE_REJECTED"
+      reasonCode:
+        type: "string"
+        example: "The order has been rejected"
+      customerAccountNumber:
+        type: "string"
+        example: "AX1234"
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/OrderSimulationItemsRejected"
+  OrderSimulationItemsAccepted:
+    allOf:
+      - $ref: '#/definitions/OrderSimulationItems'
+    properties:
+      orderItemStatus:
+        type: "string"
+        example: "ACCEPTED"
+      reasonCode:
+        type: "string"
+        example: "200"
+    xml:
+      name: "Order simulation items"
+  OrderSimulationItemsRejected:
+    allOf:
+      - $ref: '#/definitions/OrderSimulationItems'
+    properties:
+      orderItemStatus:
+        type: "string"
+        example: "PRICE_CHECK_FAILURE"
+      reasonCode:
+        type: "string"
+        example: "Price check failure"
+    xml:
+      name: "Order simulation items"
+  OrderSimulationItems:
+    type: "object"
+    required:
+      - "lineNumber"
+      - "productCode"
+      - "originalProductCode"
+      - "orderQuantity"
+      - "productDescription"
+      - "itemPrice"
+      - "lineAmount"
+      - "tax"
+      - "unitOfMeasure"
+    properties:
+      lineNumber:
+        type: "string"
+        description: "Internal Magento Item ID "
       productCode:
         type: "string"
         description: "Product SKU"
@@ -379,10 +431,10 @@ definitions:
         type: "string"
         description: "Product SKU note: to be verified with PallasFoods, currently the field duplicates productCode"
       orderQuantity:
-        type: "integer"
+        type: "number"
         description: "QTY of the order line"
       productDescription:
-        type: "integer"
+        type: "string"
         description: "Product Name"
       itemPrice:
         type: "number"
@@ -395,7 +447,7 @@ definitions:
       tax:
         type: "number"
         format: "float"
-        description: "Total Order Line amount"
+        description: "Total Order Line Tax Amount"
       unitOfMeasure:
         type: "string"
         description: "Order Line UOM"
@@ -406,8 +458,48 @@ definitions:
         type: "string"
         description: "note: to be verified with PallasFoods. Current implementation sends empty string"
     xml:
-      name: "OrderItems"
-  Error:
+      name: "Order simulation items"
+  OrderSimulationError:
+    type: "object"
+    properties:
+      error:
+        type: "boolean"
+        example: "true"
+      message:
+        type: "string"
+        example: "Required fields: 'orderValue, taxValue' are missing"
+    xml:
+      name: "Order simulation error"
+  OrderExport:
+    type: "object"
+    properties:
+      magentoOrderNumber:
+        type: "string"
+        example: "9000001234"
+      supplierOrderNumber:
+        type: "string"
+        example: "12345"
+      deliveryDate:
+        type: "string"
+        example: "2019-12-24"
+        description: "Order delivery date in format YYYY-MM-DD"
+      orderStatus:
+        type: "string"
+        example: "ACCEPTED"
+      reasonCode:
+        type: "string"
+        example: "200"
+      customerAccountNumber:
+        type: "string"
+        example: "AX1234"
+      items:
+        type: "array"
+        items:
+          allOf: 
+          - $ref: "#/definitions/OrderSimulationItemsAccepted"
+    xml:
+      name: "Order simulation"
+  CommonError:
     type: "object"
     properties:
       error:
@@ -417,7 +509,7 @@ definitions:
         type: "string"
         example: "Invalid SKUs provided"
     xml:
-      name: "Error"
+      name: "Common Error"
   ErrorMinimumOrderAmount:
     type: "object"
     properties:
@@ -428,5 +520,4 @@ definitions:
         type: "string"
         example: "Invalid Delivery Date selected"
     xml:
-      name: "Error"
-        
+      name: "Error minimum order amount"
