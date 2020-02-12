@@ -20,7 +20,7 @@ schemes:
 - "http"
 paths:
   /store/price:
-    get:
+    post:
       tags:
       - "store"
       summary: "Get Company based prices"
@@ -32,12 +32,11 @@ paths:
       - "application/json"
       parameters:
       - name: "sku"
-        in: "query"
+        in: "body"
         description: "SKU to filter by"
         required: true
-        type: "array"
-        items:
-          type: "string"
+        schema:
+          $ref: "#/definitions/StorePrice"
       - name: "customer_identifier"
         in: "query"
         description: "Customer AX ID"
@@ -210,14 +209,6 @@ paths:
       produces:
       - "application/json"
       parameters:
-      - name: "startDate"
-        in: "query"
-        type: "string"
-        required: true
-      - name: "endDate"
-        in: "query"
-        type: "string"
-        required: true
       - name: "customer_identifier"
         in: "query"
         type: "string"
@@ -257,13 +248,22 @@ paths:
           schema:
             $ref: "#/definitions/CommonError"       
 definitions:
+  StorePrice:
+    type: "object"
+    properties:
+      items:
+        type: "array"
+        items:
+          type: "string"
+    xml:
+      name: "Price"
   Price:
     type: "object"
     properties:
       items:
         type: "array"
         items:
-            $ref: "#/definitions/PriceItems"
+          $ref: "#/definitions/PriceItems"
       totalCount:
         type: "number"
         example: 1
@@ -346,17 +346,11 @@ definitions:
     type: "object"
     required:
       - "webOrderType"
-      - "navCustomerB2B"
       - "creationTime"
       - "deliveryDate"
-      - "customerReference"
       - "orderValue"
       - "taxValue"
-      - "orderDiscountValue"
-      - "currency"
       - "customerAccountNumber"
-      - "routeCode"
-      - "routePosition"
       - "emailAddress"
     properties:
       magentoOrderNumber:
@@ -368,9 +362,6 @@ definitions:
         enum:
           - "B2B"
           - "CCOLLECT"
-      navCustomerB2B:
-        type: "string"
-        description: "Customer B2B Identifier"
       creationDate:
         type: "string"
         description: "Order creation date in format YYYY-MM-DD"
@@ -400,7 +391,7 @@ definitions:
           - "GBR"
       customerAccountNumber:
         type: "string"
-        description: "Customer AX ID note: Field duplicates value from navCustomerB2B - to be verified with PallasFoods if we need to send both fields"
+        description: "Customer AX ID"
       routeCode:
         type: "string"
         description: "ROute Code"
