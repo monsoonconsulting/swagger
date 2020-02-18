@@ -222,7 +222,7 @@ paths:
           description: "No orders for selected date"
           schema:
             $ref: "#/definitions/CommonError"
-  /store/order/history{documentNo}:
+  /store/order/history/{documentNo}:
     get:
       tags:
       - "store"
